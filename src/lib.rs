@@ -7,7 +7,6 @@ use std::borrow::{BorrowMut, Cow};
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::future::Future;
-use std::iter::once;
 use std::path::PathBuf;
 use std::process::Stdio;
 use std::sync::Arc;
@@ -85,7 +84,7 @@ pub struct MpvSpawnOptions {
     pub config_dir: Option<PathBuf>,
     pub inherit_stdout: bool,
 }
-
+#[derive(Debug)]
 pub struct MpvIpc {
     shutdown: CancellationToken,
     writer: WriteHalf<mpv_platform::Stream>,
