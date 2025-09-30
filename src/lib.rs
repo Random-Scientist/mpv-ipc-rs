@@ -7,6 +7,7 @@ use std::borrow::{BorrowMut, Cow};
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::future::Future;
+use std::iter::once;
 use std::path::PathBuf;
 use std::process::Stdio;
 use std::sync::Arc;
@@ -80,7 +81,6 @@ type MpvDataOption = Option<serde_json::Value>;
 pub struct MpvSpawnOptions {
     pub mpv_path: Option<PathBuf>,
     pub mpv_additional_args: Vec<String>,
-    pub mpv_arg_prefix: Option<String>,
     pub ipc_path: Option<PathBuf>,
     pub config_dir: Option<PathBuf>,
     pub inherit_stdout: bool,
@@ -206,7 +206,6 @@ impl MpvIpc {
     }
     /// Spawn a new mpv process and attach to it.
     pub async fn spawn(opt: &MpvSpawnOptions) -> eyre::Result<Self> {
-        let prefix = opt.mpv_arg_prefix.as_deref().unwrap_or("--");
         let mpv_path = opt
             .mpv_path
             .as_ref()
@@ -218,8 +217,8 @@ impl MpvIpc {
             .map(Cow::Borrowed)
             .unwrap_or_else(|| Cow::Owned(mpv_platform::generate_ipc_path()));
         let mut args = vec![
-            "idle".to_owned(),
-            "input-ipc-server=".to_owned() + &ipc_path.to_string_lossy(),
+            "--idle".to_owned(),
+            "--input-ipc-server=".to_owned() + &ipc_path.to_string_lossy(),
         ];
         if let Some(config_dir) = &opt.config_dir {
             args.push("--config-dir=".to_owned() + &config_dir.to_string_lossy());
@@ -236,7 +235,7 @@ impl MpvIpc {
                 opt.mpv_additional_args
                     .iter()
                     .map(Into::into)
-                    .chain(args.iter().map(|v| format!("{prefix}{v}"))),
+                    .chain(args.iter().map(ToString::to_string)),
             )
             .stdin(Stdio::null())
             .stdout(stdout_mode())
