@@ -217,7 +217,10 @@ impl MpvIpc {
             .as_ref()
             .map(Cow::Borrowed)
             .unwrap_or_else(|| Cow::Owned(mpv_platform::generate_ipc_path()));
-        let mut args = vec!["input-ipc-server=".to_owned() + &ipc_path.to_string_lossy()];
+        let mut args = vec![
+            "idle".to_owned(),
+            "input-ipc-server=".to_owned() + &ipc_path.to_string_lossy(),
+        ];
         if let Some(config_dir) = &opt.config_dir {
             args.push("--config-dir=".to_owned() + &config_dir.to_string_lossy());
         }
