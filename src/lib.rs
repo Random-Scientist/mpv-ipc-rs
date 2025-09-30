@@ -230,9 +230,10 @@ impl MpvIpc {
         };
         let child = process::Command::new(mpv_path.as_ref())
             .args(
-                args.iter()
-                    .map(|v| format!("{prefix}{v}"))
-                    .chain(opt.mpv_additional_args.iter().map(Into::into)),
+                opt.mpv_additional_args
+                    .iter()
+                    .map(Into::into)
+                    .chain(args.iter().map(|v| format!("{prefix}{v}"))),
             )
             .stdin(Stdio::null())
             .stdout(stdout_mode())
