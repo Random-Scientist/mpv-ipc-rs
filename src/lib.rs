@@ -79,6 +79,7 @@ type MpvDataOption = Option<serde_json::Value>;
 #[derive(Clone, Default)]
 pub struct MpvSpawnOptions {
     pub mpv_path: Option<PathBuf>,
+    pub mpv_additional_args: Vec<String>,
     pub mpv_arg_prefix: Option<String>,
     pub ipc_path: Option<PathBuf>,
     pub config_dir: Option<PathBuf>,
@@ -228,7 +229,11 @@ impl MpvIpc {
             }
         };
         let child = process::Command::new(mpv_path.as_ref())
-            .args(args.iter().map(|v| format!("{prefix}{v}")))
+            .args(
+                args.iter()
+                    .map(|v| format!("{prefix}{v}"))
+                    .chain(opt.mpv_additional_args.iter().map(Into::into)),
+            )
             .stdin(Stdio::null())
             .stdout(stdout_mode())
             .stderr(stdout_mode())
